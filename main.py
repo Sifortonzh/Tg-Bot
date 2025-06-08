@@ -1,18 +1,34 @@
+import os
 import logging
 import requests
+from flask import Flask
+from threading import Thread
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-# === 配置 ===
-BOT_TOKEN = "7527037190:AAGiPYPzbhpPInj8jxWrm6XbRrCBEzQzzpE"
-OWNER_ID = 7187113819  # 你的Telegram ID
-DEEPSEEK_API_KEY = "sk-f32e3f49524549ae9fafce7c1c89e568"
+# === 从环境变量中读取配置 ===
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+OWNER_ID = int(os.environ.get("OWNER_ID", "0"))
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
-# === 启动日志 ===
+# === 日志配置 ===
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
+# === Flask 心跳服务 ===
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "I'm alive!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=8080)
+
+# 在后台线程启动 Flask
+Thread(target=run_web).start()
 
 # === 摘要函数 ===
 def summarize_with_deepseek(text):
@@ -30,12 +46,11 @@ def summarize_with_deepseek(text):
             ]
         }
         res = requests.post(url, headers=headers, json=payload, timeout=30)
-        summary = res.json()["choices"][0]["message"]["content"]
-        return summary
+        return res.json()["choices"][0]["message"]["content"]
     except Exception as e:
         return f"[摘要失败]: {e}"
 
-# === 消息处理函数 ===
+# === 处理访客消息 ===
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text
@@ -53,26 +68,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await context.bot.send_message(chat_id=OWNER_ID, text=message_to_owner)
 
-from flask import Flask
-from threading import Thread
-
-# 创建 Flask 应用作为心跳用
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "I'm alive!"
-
-def run_web():
-    app.run(host='0.0.0.0', port=8080)
-
-# 启动 Web 服务线程
-Thread(target=run_web).start()
-
-# === 主程序入口 ===
+# === 启动 Telegram Bot ===
 if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     print("✅ Bot 正在运行...")
     app.run_polling()
-
