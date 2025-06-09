@@ -2,6 +2,8 @@ import os
 import json
 import logging
 import requests
+from flask import Flask
+from threading import Thread
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters, CommandHandler
 
@@ -38,7 +40,7 @@ def summarize_with_deepseek(text):
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": "你是一个帮我总结访客消息的AI助理，请用一句话概括他们想表达的核心内容。"},
+                {"role": "system", "content": "你是一个 AI 助理，请用简洁自然的语言总结以下用户消息的核心内容。请自动判断用户语言并用合适的语言输出总结。"},
                 {"role": "user", "content": text}
             ],
             "temperature": 0.5
@@ -47,13 +49,16 @@ def summarize_with_deepseek(text):
         result = response.json()
         return result["choices"][0]["message"]["content"]
     except Exception as e:
-        logger.error(f"Summarization failed: {e}")
+        logger.error(f"Deepseek summary failed: {e}")
         return "Summary unavailable."
 
-# ========== 关键词监听 ==========
-KEYWORDS = ["合租", "上车", "Netflix", "拼车", "Apple Music", "出车", "iCloud", "会员", "共享"]
+# ========== 私聊处理 ==========
+WELCOME_MESSAGES = {
+    "zh": "你好！👋\n我是助理小助手，你可以在这里留言，我会把内容妥善送达给我家主人 📨",
+    "en": "Hey there! 👋\nI'm not the boss — just the intern.\nDrop your message here and I’ll make sure it reaches the top desk. ☕",
+    "default": "Hi! 👋 I'm a message assistant. Leave your note, and I’ll forward it."
+}
 
-# ========== 私聊消息处理 ==========
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text
@@ -65,11 +70,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     known_visitors = load_known_visitors()
 
     if user_id not in known_visitors:
-        welcome_msg = (
-            "Hey there! 👋\n"
-            "I'm not the boss — just the intern.\n"
-            "Drop your message here and I’ll make sure it reaches the top desk. ☕"
-        )
+        lang = user.language_code or "en"
+        welcome_msg = WELCOME_MESSAGES.get(lang, WELCOME_MESSAGES["default"])
         await update.message.reply_text(welcome_msg)
         known_visitors.add(user_id)
         save_known_visitors(known_visitors)
@@ -84,6 +86,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=OWNER_ID, text=message_to_owner)
 
 # ========== 群聊关键词监听 ==========
+KEYWORDS = ["合租", "上车", "Netflix", "拼车", "Apple Music", "出车", "iCloud", "会员", "共享"]
+
 async def handle_group_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
     if any(kw.lower() in message.text.lower() for kw in KEYWORDS):
@@ -99,20 +103,30 @@ async def handle_group_keywords(update: Update, context: ContextTypes.DEFAULT_TY
 
 # ========== /start 命令 ==========
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_msg = (
-        "Hey there! 👋\n"
-        "I'm not the boss — just the intern.\n"
-        "Drop your message here and I’ll make sure it reaches the top desk. ☕"
-    )
+    welcome_msg = WELCOME_MESSAGES["en"]
     await update.message.reply_text(welcome_msg)
+
+# ========== Flask 保活 ==========
+web = Flask('')
+
+@web.route('/')
+def home():
+    return "I'm alive!"
+
+def run_web():
+    web.run(host='0.0.0.0', port=10000)
 
 # ========== 主函数 ==========
 if __name__ == "__main__":
+    # 启动 Flask Web 保活线程
+    Thread(target=run_web).start()
+
+    # 启动 Telegram Bot
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.PRIVATE, handle_message))
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, handle_group_keywords))
 
-    logger.info("🤖 Bot is now running...")
+    logger.info("🤖 Bot is running...")
     app.run_polling()
