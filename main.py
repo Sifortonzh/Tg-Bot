@@ -74,3 +74,27 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     print("✅ Bot 正在运行...")
     app.run_polling()
+
+KEYWORDS = [
+    "合租", "上车", "拼车", "拼团", "分摊", "出车",
+    "车位", "车主", "车队", "组团", "车坑",
+    "长期车", "临时车", "接人", "缺人",
+    "YouTube", "Netflix", "Spotify", "Apple Music",
+    "iCloud", "阿里云盘", "百度网盘", "迅雷", "腾讯视频",
+    "会员", "Premium", "账号", "共享", "车速"
+]
+
+async def handle_group_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.effective_message
+    chat_type = update.effective_chat.type
+    text = message.text.lower()
+
+    if chat_type in ["group", "supergroup"]:
+        if any(keyword.lower() in text for keyword in KEYWORDS):
+            alert = (
+                f"🚨 软件合租关键词触发！\n"
+                f"群名：{update.effective_chat.title}\n"
+                f"发言人：{message.from_user.full_name}\n"
+                f"内容：{message.text}"
+            )
+            await context.bot.send_message(chat_id=OWNER_ID, text=alert)
