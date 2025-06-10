@@ -40,7 +40,7 @@ def summarize_with_deepseek(text):
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": "你是一个 AI 助理，请用简洁自然的语言总结以下用户消息的核心内容。请自动判断用户语言并用合适的语言输出总结。"},
+                {"role": "system", "content": "你是一个 AI 助理，请用简洁自然的语言总结以下用户消息的核心内容。请自动判断用户语言并用合适的语言输出总结。如果你无法判断内容则输出"Ignore"。"},
                 {"role": "user", "content": text}
             ],
             "temperature": 0.5
@@ -54,7 +54,7 @@ def summarize_with_deepseek(text):
 
 # ========== 私聊处理 ==========
 WELCOME_MESSAGES = {
-    "zh": "你好！👋\n我是助理小助手，你可以在这里留言，我会把内容妥善送达给我家主人 📨",
+    "zh": "你好！👋\n我是私聊小助手，你可以在这里留言，我会把内容妥善送达给我家主人 📨",
     "en": "Hey there! 👋\nI'm not the boss — just the intern.\nDrop your message here and I’ll make sure it reaches the top desk. ☕",
     "default": "Hi! 👋 I'm a message assistant. Leave your note, and I’ll forward it."
 }
@@ -86,7 +86,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=OWNER_ID, text=message_to_owner)
 
 # ========== 群聊关键词监听 ==========
-KEYWORDS = ["合租", "上车", "Netflix", "拼车", "Apple Music", "出车", "iCloud", "会员", "共享"]
+KEYWORDS = ["合租", "上车", "拼车", "出", "会员", "共享", "账号", "Netflix", "YouTube", "Apple Music", "iCloud", "Spotify"]
 
 async def handle_group_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
@@ -94,10 +94,10 @@ async def handle_group_keywords(update: Update, context: ContextTypes.DEFAULT_TY
         group_name = update.effective_chat.title
         sender = message.from_user.full_name
         alert = (
-            f"🚨 关键词触发！\n"
-            f"👥 群组：{group_name}\n"
-            f"🙋 用户：{sender}\n"
-            f"💬 内容：{message.text}"
+            f"🚨 Keywords Mention！\n"
+            f"👥 Cluster：{group_name}\n"
+            f"🙋 USER：{sender}\n"
+            f"💬 Content：{message.text}"
         )
         await context.bot.send_message(chat_id=OWNER_ID, text=alert)
 
