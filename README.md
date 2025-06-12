@@ -37,7 +37,7 @@ Create a `.env` file or set these in Render:
 ```env
 BOT_TOKEN=your_telegram_bot_token
 OWNER_ID=your_telegram_numeric_id
-OPENAI_API_KEY=your_deepseek_api_key
+DEEPSEEK_API_KEY=your_deepseek_api_key
 ```
 
 ---
