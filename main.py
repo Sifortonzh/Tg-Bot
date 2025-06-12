@@ -40,7 +40,7 @@ def summarize_with_deepseek(text):
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": "你是一个 AI 助理，请用简洁自然的语言总结以下用户消息的核心内容。请自动判断用户语言并用合适的语言输出总结。如果你无法判断内容则输出"Ignore"。"},
+                {"role": "system", "content": "You are an AI assistant, please summarize the core content of the following user message in simple and natural language. Please automatically determine the user's language and output the summary in appropriate language."},
                 {"role": "user", "content": text}
             ],
             "temperature": 0.5
