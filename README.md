@@ -8,7 +8,7 @@ A friendly and intelligent Telegram bot designed to auto-greet new users, monito
 
 - 👋 Auto-greets new members with a welcome message
 - 🔍 Monitors messages for keywords like `YouTube`, `Netflix`, `合租`, etc.
-- 🧠 Summarizes messages with OpenAI (GPT-4)
+- 🧠 Summarizes messages using either **OpenAI** or **Deepseek** based on configuration
 - 📊 Sends a weekly keyword and usage report to the admin
 - 🕒 Optimized for Render deployment with **UptimeRobot** keep-alive
 
@@ -44,6 +44,23 @@ Add the following variables in Render → Environment tab:
 ```
 BOT_TOKEN=your_telegram_bot_token
 ADMIN_CHAT_ID=your_personal_telegram_id
+
+# Choose one of the following providers:
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key
+
+# OR
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions
+```
+
+
+Add the following variables in Render → Environment tab:
+
+```
+BOT_TOKEN=your_telegram_bot_token
+ADMIN_CHAT_ID=your_personal_telegram_id
 OPENAI_API_KEY=your_openai_api_key
 ```
 
@@ -73,6 +90,6 @@ Use [https://uptimerobot.com/](https://uptimerobot.com/) to ping your Render URL
 
 ## 📬 Author
 
-Built with ❤️ by [Ryan](avecrouge.com)
+Built with ❤️ by Ryan (avecrouge.com)
 
 MIT License.

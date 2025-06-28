@@ -34,21 +34,41 @@ def greet_user(update: Update, context: CallbackContext):
 
 # === AI Summary via OpenAI ===
 def ai_summarize(text):
+    model = os.getenv("LLM_PROVIDER", "openai")
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes Telegram messages about account sharing or subscription coordination."},
-                {"role": "user", "content": f"Summarize this message in 1 sentence:
-{text}"}
-            ],
-            max_tokens=100
-        )
-        return response.choices[0].message['content'].strip()
+        if model == "deepseek":
+            import requests
+            DEEPSEEK_API_URL = os.getenv("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions")
+            DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant that summarizes Telegram messages about account sharing or subscription coordination."},
+                    {"role": "user", "content": f"Summarize this message in 1 sentence:\n{text}"}
+                ],
+                "temperature": 0.5
+            }
+            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload, timeout=10)
+            result = response.json()
+            return result['choices'][0]['message']['content'].strip()
+        else:
+            import openai
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that summarizes Telegram messages about account sharing or subscription coordination."},
+                    {"role": "user", "content": f"Summarize this message in 1 sentence:\n{text}"}
+                ],
+                max_tokens=100
+            )
+            return response.choices[0].message['content'].strip()
     except Exception as e:
         return f"[AI error: {e}]"
-
-# === Keyword Detection & Summary Notification ===
 def keyword_listener(update: Update, context: CallbackContext):
     text = update.message.text
     user = update.effective_user.full_name
