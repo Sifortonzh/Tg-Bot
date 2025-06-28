@@ -1,142 +1,78 @@
+# Slack-Style Telegram Bot 🤖
 
-# 🛎️ Slack-Style Telegram Assistant Bot
+This is a Telegram bot with Slack-style interaction logic, built using Python.
 
-A lightweight, low-profile Telegram bot designed to quietly forward private messages and monitor group chats for keyword triggers. Runs on Render with Deepseek for AI-powered summaries. Slack intern vibes only. ☕
+## ✨ Features
+
+1. **👋 Welcome New Users**  
+   Greets new members who join the group.
+
+2. **🔍 Keyword Monitoring**  
+   Listens for keywords like `上车`, `YouTube`, `Netflix`, etc., in group messages.
+
+3. **🧠 AI-Based Message Summary**  
+   Forwards analyzed messages to admin (currently mocked, replace with real AI API).
+
+4. **📊 Weekly Stats Report**  
+   Automatically sends a weekly summary of keyword usage and message activity.
 
 ---
 
-## 🧠 Features
+## 🚀 Getting Started
 
-- ✅ **Private message forwarding** – forwards visitor messages to you
-- ✅ **Slack-style auto-reply** – greets new users with a friendly message
-- ✅ **Deepseek-powered summaries** – summarizes each message with AI
-- ✅ **Group keyword alerts** – monitors groups for words like "合租", "上车", "Netflix"
-- ✅ **Render-compatible** – supports `run_polling` and Flask keepalive
-- ✅ **UptimeRobot friendly** – stays awake with external pings
-- ✅ **Multilingual welcome messages** – based on user language
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourusername/tg-bot-slack-style.git
+cd tg-bot-slack-style
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Setup environment variables
+
+Create a `.env` file or set environment variables:
+
+```
+BOT_TOKEN=your_telegram_bot_token
+ADMIN_CHAT_ID=your_telegram_id
+```
+
+### 4. Run the bot
+
+```bash
+python bot.py
+```
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Tg-Bot/
-├── main.py               # Main bot logic (polling + summary + alert)
-├── known_visitors.json   # Stores users who already received welcome
-├── README.md             # You're reading it!
-├── .env (or use Render Env Settings)
-└── requirements.txt      # Python dependencies
+tg-bot-slack-style/
+├── bot.py                 # Main bot script
+├── data/                  # Future data storage
+├── logs/                  # Logs folder
+├── scripts/               # Optional scripts
+├── requirements.txt       # Python dependencies
+└── README.md              # Documentation
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## 📌 To Do
 
-Create a `.env` file or set these in Render:
-
-```env
-BOT_TOKEN=your_telegram_bot_token
-OWNER_ID=your_telegram_numeric_id
-OPENAI_API_KEY=your_deepseek_api_key
-```
+- [ ] Integrate with OpenAI for real AI message summarization
+- [ ] Webhook deployment
+- [ ] Command interface for admin
 
 ---
 
-## 🚀 How to Run
+## 🛠 Tech Stack
 
-### 🖥️ Local (for testing)
-
-```bash
-pip install -r requirements.txt
-python main.py
-```
-
-### ☁️ Deploy on [Render](https://render.com)
-
-1. Fork this repo
-2. Connect it to Render as a Web Service
-3. Set environment variables
-4. Set port to `10000` (Flask keepalive server)
-5. Enable auto-deploy from GitHub
-
----
-
-## 🟢 Keepalive Setup with UptimeRobot
-
-To prevent Render from sleeping:
-
-1. Visit https://uptimerobot.com
-2. Create an HTTPS monitor
-3. Set ping URL as:
-
-```
-https://your-bot-name.onrender.com/
-```
-
-4. Set check interval to every 5 minutes
-
----
-
-## 🧠 Group Keyword Monitoring
-
-The bot scans all group messages for these software-sharing keywords:
-
-```python
-["合租", "上车", "Netflix", "拼车", "Apple Music", "出车", "iCloud", "会员", "共享"]
-```
-
-If triggered, it alerts the owner with:
-
-- Group name
-- Sender
-- Original message
-
----
-
-## 💬 Bot Personality
-
-This bot is your loyal intern. Doesn’t talk much.  
-Takes a message, nods, walks quietly to the boss’s desk and drops it off.  
-Slack vibes only. ☕
-
----
-
-## 📝 requirements.txt
-
-```text
-python-telegram-bot==20.7
-Flask==2.3.3
-requests
-```
-
----
-
-## 📎 Example Screenshot
-
-_(Optional)_ Add a screenshot of the bot in action here:
-
-```
-📩 New message from @username (ID: 123456789)
-📝 I’d like to join the Apple Music group.
-📌 Summary:
-User is asking to join a shared Apple Music group.
-```
-
----
-
-## ✅ Roadmap
-
-- [x] Deepseek summary integration
-- [x] UptimeRobot keepalive
-- [x] Welcome message memory
-- [ ] Claude/GPT switchable backend
-- [ ] Command menu for bot settings
-- [ ] Notion/Airtable message log
-
----
-
-## 👨‍💻 Author
-
-**Ryan**  
-🔗 [avecrouge.com](https://avecrouge.com)  
-🤖 Telegram Bot: [@avechat_bot](https://t.me/avechat_bot)
+- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
+- [APScheduler](https://apscheduler.readthedocs.io/en/latest/)
