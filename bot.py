@@ -82,7 +82,7 @@ def keyword_listener(update: Update, context: CallbackContext):
 
     if matched:
         summary = ai_summarize(text)
-        context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"📬 AI Summary:
+        context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"📬 *Heads up!* We caught something interesting 🤖\n👤 *User:* {user}\n📝 *Summary:* {summary}", parse_mode="Markdown")
 From: {user}
 Content: {summary}")
 
