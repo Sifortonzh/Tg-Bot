@@ -1,53 +1,104 @@
+import os
+import time
+import threading
+import requests
+import logging
+import collections
+import openai
+
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext
 from apscheduler.schedulers.background import BackgroundScheduler
-import logging
-import collections
-import os
 
-# === 配置项 ===
+# === Configuration ===
 BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
 ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID', 'YOUR_TELEGRAM_ID_HERE')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'YOUR_OPENAI_API_KEY')
+RENDER_PING_URL = os.getenv('RENDER_PING_URL', 'https://your-render-url.onrender.com')
 
-KEYWORDS = ["上车", "YouTube", "Netflix", "合租", "机场", "油管"]
+openai.api_key = OPENAI_API_KEY
 
-# === 日志设置 ===
+KEYWORDS = ["join", "YouTube", "Netflix", "shared", "vpn", "account", "login", "上车", "合租", "机场", "油管"]
+
+# === Logging ===
 logging.basicConfig(filename='logs/bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-# === 统计信息 ===
+# === Stats ===
 stats = {
     "visits": 0,
     "keywords": collections.Counter(),
 }
 
+# === Keep-alive ping ===
+def keep_alive():
+    def ping():
+        while True:
+            try:
+                requests.get(RENDER_PING_URL)
+                print("Keep-alive ping successful.")
+            except Exception as e:
+                print("Ping failed:", e)
+            time.sleep(300)
+    t = threading.Thread(target=ping)
+    t.daemon = True
+    t.start()
+
+# === Greet new users ===
 def greet_user(update: Update, context: CallbackContext):
     for member in update.message.new_chat_members:
-        msg = f"Hi {member.full_name} 👋\nI'm your assistant bot. Please hang tight while we check things out!"
-        context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+        message = f"Hi {member.full_name} 👋\nWelcome to the group! Please wait while we check your request."
+        context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
+# === AI summarization ===
+def ai_summarize(text):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes Telegram messages about account sharing or subscription coordination."},
+                {"role": "user", "content": f"Summarize this message in 1 sentence:
+{text}"}
+            ],
+            max_tokens=100
+        )
+        return response.choices[0].message['content'].strip()
+    except Exception as e:
+        return f"[AI error: {e}]"
+
+# === Listen for keywords and summarize ===
 def keyword_listener(update: Update, context: CallbackContext):
     text = update.message.text
     user = update.effective_user.full_name
     stats["visits"] += 1
-    triggered = False
+    matched = False
 
     for kw in KEYWORDS:
         if kw.lower() in text.lower():
             stats["keywords"][kw] += 1
-            triggered = True
+            matched = True
 
-    if triggered:
-        summary = f"{user} 提到了关键词：\n"{text}""
-        context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"📬 AI 分析摘要：\n{summary}")
+    if matched:
+        summary = ai_summarize(text)
+        context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"📬 AI Summary:
+From: {user}
+Content: {summary}")
 
+# === Weekly stats report ===
 def weekly_report(context: CallbackContext):
-    report = f"📊 每周统计\n总触发数：{stats['visits']}\n"
+    report = f"📊 Weekly Stats Report
+Total messages: {stats['visits']}
+Keyword matches:
+"
     for kw, count in stats["keywords"].items():
-        report += f" - {kw}: {count} 次\n"
+        report += f" - {kw}: {count} times
+"
     context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=report)
 
+# === Main runner ===
 def main():
+    keep_alive()
+
     updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
@@ -58,6 +109,7 @@ def main():
     scheduler.add_job(lambda: weekly_report(dispatcher), 'interval', weeks=1)
     scheduler.start()
 
+    print("Bot is running...")
     updater.start_polling()
     updater.idle()
 
