@@ -23,8 +23,8 @@ This is a Telegram bot with Slack-style interaction logic, built using Python.
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/tg-bot-slack-style.git
-cd tg-bot-slack-style
+git clone https://github.com/Sifortonzh/Tg-Bot.git
+cd Tg-Bot
 ```
 
 ### 2. Install dependencies
