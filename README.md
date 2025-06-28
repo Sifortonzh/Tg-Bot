@@ -1,78 +1,78 @@
 # Slack-Style Telegram Bot 🤖
 
-This is a Telegram bot with Slack-style interaction logic, built using Python.
-
-## ✨ Features
-
-1. **👋 Welcome New Users**  
-   Greets new members who join the group.
-
-2. **🔍 Keyword Monitoring**  
-   Listens for keywords like `上车`, `YouTube`, `Netflix`, etc., in group messages.
-
-3. **🧠 AI-Based Message Summary**  
-   Forwards analyzed messages to admin (currently mocked, replace with real AI API).
-
-4. **📊 Weekly Stats Report**  
-   Automatically sends a weekly summary of keyword usage and message activity.
+A friendly and intelligent Telegram bot designed to auto-greet new users, monitor shared-account keywords, summarize messages using OpenAI, and report weekly usage stats — all with a Slack-like experience.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Features
 
-### 1. Clone the repo
+- 👋 Auto-greets new members with a welcome message
+- 🔍 Monitors messages for keywords like `YouTube`, `Netflix`, `合租`, etc.
+- 🧠 Summarizes messages with OpenAI (GPT-4)
+- 📊 Sends a weekly keyword and usage report to the admin
+- 🕒 Optimized for Render deployment with **UptimeRobot** keep-alive
 
-```bash
-git clone https://github.com/Sifortonzh/Tg-Bot.git
-cd Tg-Bot
+---
+
+## 🧱 Project Structure
+
+```
+tg-bot/
+├── bot.py               # Main bot script
+├── requirements.txt     # Python dependencies
+├── logs/                # Log output folder
+├── data/                # Reserved for future data handling
+└── README.md            # This file
 ```
 
-### 2. Install dependencies
+---
+
+## 🛠 Setup & Deployment
+
+### 1. Prepare environment
+
+Make sure you have Python 3.8+ and run:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Setup environment variables
+### 2. Setup environment variables
 
-Create a `.env` file or set environment variables:
+Add the following variables in Render → Environment tab:
 
 ```
 BOT_TOKEN=your_telegram_bot_token
-ADMIN_CHAT_ID=your_telegram_id
+ADMIN_CHAT_ID=your_personal_telegram_id
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-### 4. Run the bot
+### 3. Deploy to Render
+
+- Create a new **Web Service**
+- Connect your GitHub repo
+- Set `Start Command` as:
 
 ```bash
 python bot.py
 ```
 
----
+### 4. Setup UptimeRobot (for keep-alive)
 
-## 📁 Project Structure
-
-```
-tg-bot-slack-style/
-├── bot.py                 # Main bot script
-├── data/                  # Future data storage
-├── logs/                  # Logs folder
-├── scripts/               # Optional scripts
-├── requirements.txt       # Python dependencies
-└── README.md              # Documentation
-```
+Use [https://uptimerobot.com/](https://uptimerobot.com/) to ping your Render URL every 5 minutes.
 
 ---
 
-## 📌 To Do
+## 🧠 Extend This Bot
 
-- [ ] Integrate with OpenAI for real AI message summarization
-- [ ] Webhook deployment
-- [ ] Command interface for admin
+- Add commands like `/summary`, `/help`
+- Switch to webhook + Flask for faster response
+- Add SQLite or Supabase for persistent storage
 
 ---
 
-## 🛠 Tech Stack
+## 📬 Author
 
-- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
-- [APScheduler](https://apscheduler.readthedocs.io/en/latest/)
+Built with ❤️ by Ryan (avecrouge.com)
+
+MIT License.
