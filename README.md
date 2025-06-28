@@ -90,6 +90,6 @@ Use [https://uptimerobot.com/](https://uptimerobot.com/) to ping your Render URL
 
 ## 📬 Author
 
-Built with ❤️ by Ryan (avecrouge.com)
+Built with ❤️ by [Ryan](avecrouge.com)
 
 MIT License.
